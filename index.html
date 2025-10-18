@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Dashboard</title>
+    <style>
+        :root {
+            --light-bg: #f4f7f6;
+            --light-text: #333;
+            --light-card-bg: #ffffff;
+            --light-border: #eee;
+            --light-shadow: rgba(0, 0, 0, 0.05);
+
+            --dark-bg: #282c34;
+            --dark-text: #e0e0e0;
+            --dark-card-bg: #3a3f4a;
+            --dark-border: #444;
+            --dark-shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align content to the top */
+            min-height: 100vh; /* Ensure full viewport height */
+            background-color: var(--light-bg);
+            color: var(--light-text);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        .container {
+            background-color: var(--light-card-bg);
+            border: 1px solid var(--light-border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--light-shadow);
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        body.dark-mode .container {
+            background-color: var(--dark-card-bg);
+            border: 1px solid var(--dark-border);
+            box-shadow: 0 4px 12px var(--dark-shadow);
+        }
+
+        h1 {
+            color: var(--light-text);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+        body.dark-mode h1 {
+            color: var(--dark-text);
+        }
+
+        #clock {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px 0;
+            color: #007bff; /* A distinct color for the clock */
+            background-color: #e9f5ff;
+            border-radius: 5px;
+            border: 1px solid #cce5ff;
+            transition: color 0.3s, background-color 0.3s, border-color 0.3s;
+        }
+
+        body.dark-mode #clock {
+            color: #72b0f0; /* Dark mode clock color */
+            background-color: #334455;
+            border: 1px solid #445566;
+        }
+
+        #echo-input {
+            width: calc(100% - 22px); /* Account for padding and border */
+            padding: 10px;
+            border: 1px solid var(--light-border);
+            border-radius: 5px;
+            font-size: 1em;
+            background-color: var(--light-card-bg);
+            color: var(--light-text);
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode #echo-input {
+            border: 1px solid var(--dark-border);
+            background-color: var(--dark-card-bg);
+            color: var(--dark-text);
+        }
+
+        #echo-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        body.dark-mode #echo-input:focus {
+            border-color: #72b0f0;
+            box-shadow: 0 0 0 2px rgba(114, 176, 240, 0.25);
+        }
+
+        #echo-output {
+            min-height: 25px; /* Ensure space even when empty */
+            padding: 10px;
+            border: 1px dashed var(--light-border);
+            border-radius: 5px;
+            background-color: #f8f8f8;
+            color: var(--light-text);
+            font-family: monospace;
+            white-space: pre-wrap; /* Preserve whitespace and wrap text */
+            word-break: break-word; /* Break long words */
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode #echo-output {
+            border: 1px dashed var(--dark-border);
+            background-color: #2f343d;
+            color: var(--dark-text);
+        }
+
+        #toggle-theme {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s, transform 0.1s ease;
+            align-self: flex-end; /* Align button to the right */
+        }
+
+        #toggle-theme:hover {
+            background-color: #0056b3;
+        }
+
+        #toggle-theme:active {
+            transform: translateY(1px);
+        }
+
+        body.dark-mode #toggle-theme {
+            background-color: #72b0f0;
+        }
+
+        body.dark-mode #toggle-theme:hover {
+            background-color: #4a8edb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard</h1>
+
+        <div id="clock"></div>
+
+        <input type="text" id="echo-input" placeholder="Type something here...">
+
+        <div id="echo-output"></div>
+
+        <button id="toggle-theme">Toggle Dark Mode</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const clockElement = document.getElementById('clock');
+            const echoInput = document.getElementById('echo-input');
+            const echoOutput = document.getElementById('echo-output');
+            const toggleThemeButton = document.getElementById('toggle-theme');
+            const body = document.body;
+
+            // 1. Live-updating clock
+            function updateClock() {
+                const now = new Date();
+                clockElement.textContent = now.toLocaleTimeString();
+            }
+
+            // Update clock immediately and then every second
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // 2. Text input that echoes below
+            echoInput.addEventListener('input', () => {
+                echoOutput.textContent = echoInput.value;
+            });
+
+            // 3. Button that toggles dark mode
+            toggleThemeButton.addEventListener('click', () => {
+                body.classList.toggle('dark-mode');
+                // Persist theme preference in localStorage
+                if (body.classList.contains('dark-mode')) {
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+
+            // Apply saved theme on page load
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+            } else {
+                // Default to light if no theme saved or saved as 'light'
+                body.classList.remove('dark-mode');
+            }
+        });
+    </script>
+</body>
+</html>
